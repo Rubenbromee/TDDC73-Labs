@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ScrollView, Text, View } from 'react-native';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Button, Pressable, ScrollView, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 
-const Stack = createNativeStackNavigator();
 
 type Repo = {
 	name: string;
@@ -12,6 +13,18 @@ type Repo = {
 	stargazers_count: number;
 	created_at: string; // ISO-String
 };
+
+// Typing for navigation components
+type RootStackParamList = {
+	Overview: {
+		repos: Repo[];
+	};
+	Repository: {
+		repo: Repo;
+	};
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Function for retrieveing a list of repo's
 function retrieveRepos(): Repo[] {
@@ -68,6 +81,7 @@ const shortenDiscriptionText = (text: string, length: number) => {
 // Component for listing repo's on click navigate to that repo
 const Overview: React.FC = () => {
 	const repos = retrieveRepos();
+
 	return (
 		<ScrollView contentContainerStyle={{ alignItems: 'center' }}>
 			{repos.map((repo, idx) => {
@@ -77,17 +91,27 @@ const Overview: React.FC = () => {
 	);
 };
 
+type RepositoryProps = NativeStackScreenProps<RootStackParamList, 'Repository'>
+
 // Component for displaying detailed information about a given repo
-const Repository: React.FC = () => {
-	return <View></View>;
+const Repository: React.FC<RepositoryProps> = ({ route, navigation }) => {
+	return (
+		<View>
+			<Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+				{route.params.repo.name}
+			</Text>
+		</View>
+	);
 };
 
 type RepoItemProps = {
-	repo: Repo
+	repo: Repo,
 }
 
 // Component for displaying a repo in a list
 const RepoItem: React.FC<RepoItemProps> = ({ repo }) => {
+	const navigation = useNavigation();
+	const [buttonColor, setButtonColor] = useState('#24a0ed')
 	return (
 		<View style={{ backgroundColor: 'white', width: '90%', marginVertical: 5, borderRadius: 5, padding: 10 }}>
 			<Text style={{ fontSize: 20, fontWeight: 'bold' }}>{repo.name}</Text>
@@ -112,21 +136,26 @@ const RepoItem: React.FC<RepoItemProps> = ({ repo }) => {
 				<Text>
 					{repo.stargazers_count}
 				</Text>
+				<View style={{ width: '85%', justifyContent: 'flex-end', flexDirection: 'row' }}>
+					<Pressable
+						style={{ backgroundColor: buttonColor, width: 100, height: 30, justifyContent: 'center', alignItems: 'center', borderRadius: 3 }}
+						onPress={() => navigation.navigate('Repository' as never, { repo: repo } as never)}
+						onPressIn={() => setButtonColor('#0a517e')}
+						onPressOut={() => setButtonColor('#24a0ed')}
+					>
+						<Text style={{ color: 'white' }}>Read more</Text>
+					</Pressable>
+				</View>
 			</View>
-		</View>
+		</View >
 	)
 }
 
-type RootStackParamList = {
-	Overview: {
-		repos: Repo[];
-	};
-	Repository: {
-		repo: Repo;
-	};
-};
+
 
 const App = () => {
+	// Get list of unfiltered repos
+
 	return (
 		<NavigationContainer>
 			<Stack.Navigator>

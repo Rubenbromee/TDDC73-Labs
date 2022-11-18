@@ -2,7 +2,9 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ScrollView, Text, View } from 'react-native';
+
 const Stack = createNativeStackNavigator();
+
 type Repo = {
 	name: string;
 	description: string;
@@ -10,12 +12,13 @@ type Repo = {
 	stargazers_count: number;
 	created_at: string; // ISO-String
 };
+
 // Function for retrieveing a list of repo's
 function retrieveRepos(): Repo[] {
 	return [
 		{
 			created_at: '2022-01-01',
-			description: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. ',
+			description: 'At vero  ',
 			stargazers_count: 1,
 			language: 'Java',
 			name: 'Java Project',
@@ -50,10 +53,18 @@ function retrieveRepos(): Repo[] {
 		},
 	];
 }
+
 // Function for sorting a given list of repo's
 function filterRepos(repos: Repo[]): Repo[] {
 	return repos;
 }
+
+// Shorten text to a given number of characters and add ellipsis
+const shortenDiscriptionText = (text: string, length: number) => {
+	let shortText = text.substring(0, length);
+	return shortText.length >= length ? shortText.concat('', '...') : shortText;
+}
+
 // Component for listing repo's on click navigate to that repo
 const Overview: React.FC = () => {
 	const repos = retrieveRepos();
@@ -65,7 +76,8 @@ const Overview: React.FC = () => {
 		</ScrollView>
 	);
 };
-// Component for displaying a given repo
+
+// Component for displaying detailed information about a given repo
 const Repository: React.FC = () => {
 	return <View></View>;
 };
@@ -74,21 +86,37 @@ type RepoItemProps = {
 	repo: Repo
 }
 
+// Component for displaying a repo in a list
 const RepoItem: React.FC<RepoItemProps> = ({ repo }) => {
 	return (
-		<View style={{ backgroundColor: 'white', width: '80%', marginVertical: 5 }}>
-			<Text>{repo.name}</Text>
-			<Text>Created at: {repo.created_at}</Text>
-			<Text>{repo.description}</Text>
-			<View style={{ flexDirection: 'row' }}>
+		<View style={{ backgroundColor: 'white', width: '90%', marginVertical: 5, borderRadius: 5, padding: 10 }}>
+			<Text style={{ fontSize: 20, fontWeight: 'bold' }}>{repo.name}</Text>
+			<View style={{ flexDirection: 'row', marginTop: 5 }}>
+				<Text style={{ fontWeight: 'bold' }}>
+					Created:{' '}
+				</Text>
+				<Text>
+					{repo.created_at}
+				</Text>
+			</View>
+			<Text style={{ fontSize: 15, fontWeight: 'bold', marginTop: 5 }}>Description</Text>
+			<Text>{shortenDiscriptionText(repo.description, 250)}</Text>
+			<View style={{ flexDirection: 'row', marginTop: 5 }}>
 				<Text style={{ fontWeight: 'bold' }}>Language: </Text>
 				<Text>{repo.language}</Text>
 			</View>
-
-			<Text>Stars: {repo.stargazers_count}</Text>
+			<View style={{ flexDirection: 'row', marginTop: 5 }}>
+				<Text style={{ fontWeight: 'bold' }}>
+					Stars:{' '}
+				</Text>
+				<Text>
+					{repo.stargazers_count}
+				</Text>
+			</View>
 		</View>
 	)
 }
+
 type RootStackParamList = {
 	Overview: {
 		repos: Repo[];
@@ -97,8 +125,8 @@ type RootStackParamList = {
 		repo: Repo;
 	};
 };
+
 const App = () => {
-	// BLOCKER
 	return (
 		<NavigationContainer>
 			<Stack.Navigator>
@@ -116,4 +144,5 @@ const App = () => {
 		</NavigationContainer>
 	);
 };
+
 export default App;

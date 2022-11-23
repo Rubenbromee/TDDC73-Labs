@@ -16,10 +16,12 @@ import {useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import {
     ActivityIndicator,
-    MD3DarkTheme as DefaultTheme,
+    MD3LightTheme as DefaultTheme,
     MD3Theme,
 } from 'react-native-paper';
 import {Provider as PaperProvider} from 'react-native-paper';
+import DropDown from 'react-native-paper-dropdown';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 type Repo = {
     name: string;
@@ -37,15 +39,33 @@ type RootStackParamList = {
     };
 };
 
+const Languages = [
+    {
+        label: 'C++',
+        value: 'c++',
+    },
+    {
+        label: 'Rust',
+        value: 'rust',
+    },
+    {
+        label: 'C',
+        value: 'c',
+    },
+    {
+        label: 'Go',
+        value: 'go',
+    },
+    {
+        label: 'Top Overall',
+        value: '',
+    },
+];
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function getRequestURL(from_date_iso: string) {
-    return `https://api.github.com/search/repositories?q=language:rust&sort=stars&order=desc&created:>${from_date_iso}`;
-}
-
-// Function for sorting a given list of repo's
-function filterRepos(repos: Repo[]): Repo[] {
-    return repos;
+function getRequestURL(from_date_iso: string, language: string) {
+    return `https://api.github.com/search/repositories?q=language:${language}&sort=stars&order=desc&created:>${from_date_iso}`;
 }
 
 // Shorten text to a given number of characters and add ellipsis
@@ -57,8 +77,10 @@ const shortenDiscriptionText = (text: string, length: number) => {
 // Component for listing repo's on click navigate to that repo
 const Overview: React.FC = () => {
     const {width, height} = useWindowDimensions();
+    const [language, setLanguage] = useState(Languages[0].value);
+    const [showDropdown, setShowDropdown] = useState(false);
 
-    const {repos} = useGithubRepoData();
+    const {repos} = useGithubRepoData(language);
     if (repos.length == 0) {
         return (
             <View
@@ -74,11 +96,23 @@ const Overview: React.FC = () => {
     }
 
     return (
-        <ScrollView contentContainerStyle={{alignItems: 'center'}}>
-            {repos.map((repo, idx) => {
-                return <RepoItem repo={repo} key={idx} />;
-            })}
-        </ScrollView>
+        <SafeAreaView>
+            <DropDown
+                label={'Language'}
+                mode={'outlined'}
+                visible={showDropdown}
+                showDropDown={() => setShowDropdown(true)}
+                onDismiss={() => setShowDropdown(false)}
+                value={language}
+                setValue={setLanguage}
+                list={Languages}
+            />
+            <ScrollView contentContainerStyle={{alignItems: 'center'}}>
+                {repos.map((repo, idx) => {
+                    return <RepoItem repo={repo} key={idx} />;
+                })}
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
@@ -139,7 +173,13 @@ const RepoItem: React.FC<RepoItemProps> = ({repo}) => {
                         {new Date(repo.created_at).toDateString()}
                     </Text>
                 </View>
-                <Text style={{fontSize: 15, fontWeight: 'bold', marginTop: 5}}>
+                <Text
+                    style={{
+                        fontSize: 15,
+                        fontWeight: 'bold',
+                        marginTop: 5,
+                        color: 'black',
+                    }}>
                     Description
                 </Text>
                 <Text style={{color: 'black'}}>
@@ -188,12 +228,14 @@ const RepoItem: React.FC<RepoItemProps> = ({repo}) => {
     );
 };
 
-const useGithubRepoData = () => {
+const useGithubRepoData = (language: string) => {
     const [repos, setRepos] = useState<Repo[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
         // Make request
-        fetch(getRequestURL('2022-10-01'))
+        fetch(getRequestURL('2022-10-01', language))
             .then(value => value.json())
             .then(json => {
                 setRepos(
@@ -207,8 +249,9 @@ const useGithubRepoData = () => {
                         };
                     }),
                 );
+                setLoading(false);
             });
-    }, []);
+    }, [language]);
 
     return {repos};
 };

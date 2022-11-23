@@ -182,14 +182,17 @@ const App = () => {
 										<Image source={mastercard} />
 									</View>
 								}
+								<Text style={style.cardNumberText}>CARD NUMBER</Text>
 								<Text style={style.cardNumber}>
 									{' '}
 									{formatedCardNumber(cardNumber)}{' '}
 								</Text>
+								<Text style={style.cardHolderText}>CARD HOLDER</Text>
 								<Text style={style.cardHolder}>
 									{' '}
 									{cardHolder}
 								</Text>
+								<Text style={style.expirationDateText}>EXPIRATION DATE</Text>
 								<Text style={style.expirationDate}>
 									{month + '/' + year.substring(2, 4)}
 								</Text>
@@ -204,6 +207,7 @@ const App = () => {
 										height: 40,
 										top: '10%',
 									}}></View>
+								<Text style={style.cvvText}>CVV</Text>
 								<View
 									style={{
 										...StyleSheet.absoluteFillObject,
@@ -350,6 +354,30 @@ const style = StyleSheet.create({
 		left: '27%',
 		top: '-75%',
 	},
+	cardNumberText: {
+		...StyleSheet.absoluteFillObject,
+		color: 'white',
+		left: "7%",
+		top: "37%"
+	},
+	cardHolderText: {
+		...StyleSheet.absoluteFillObject,
+		color: 'white',
+		left: "7%",
+		top: "65%"
+	},
+	expirationDateText: {
+		...StyleSheet.absoluteFillObject,
+		color: 'white',
+		left: "60%",
+		top: "65%"
+	},
+	cvvText: {
+		...StyleSheet.absoluteFillObject,
+		color: 'white',
+		left: "85%",
+		top: "29.5%"
+	}
 });
 
 export default App;
